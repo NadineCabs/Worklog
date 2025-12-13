@@ -10,8 +10,6 @@ class Shift extends Model
     use HasFactory;
 
     protected $table = 'shifts';
-    
-    // Use 'id' as primary key (Laravel convention)
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -29,6 +27,6 @@ class Shift extends Model
     // Relationship: A shift can have many employees
     public function employees()
     {
-        return $this->hasMany(Employee::class);
+        return $this->hasMany(Employee::class, 'shift_id');
     }
 }

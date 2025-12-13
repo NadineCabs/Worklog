@@ -62,7 +62,13 @@
                                 </div>
                                 <div>
                                     <div class="text-sm font-semibold text-gray-900">{{ $shift->shift_name }}</div>
-                                    <div class="text-xs text-gray-500">ID: {{ $shift->id }}</div>
+                                    <div class="text-xs text-gray-500">
+                                        @php
+                                            $start = \Carbon\Carbon::parse($shift->start_time)->format('h:i A');
+                                            $end = \Carbon\Carbon::parse($shift->end_time)->format('h:i A');
+                                        @endphp
+                                        {{ $start }} - {{ $end }}
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -205,7 +211,7 @@
                         </label>
                         <input type="text" name="shift_name" required value="{{ old('shift_name') }}"
                                placeholder="e.g., Morning Shift, Night Shift"
-                               class="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('shift_name') border-red-500 @enderror">
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('shift_name') border-red-500 @enderror">
                         @error('shift_name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -217,7 +223,7 @@
                                 Start Time <span class="text-red-500">*</span>
                             </label>
                             <input type="time" name="start_time" required value="{{ old('start_time') }}"
-                                   class="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('start_time') border-red-500 @enderror">
+                                   class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('start_time') border-red-500 @enderror">
                             @error('start_time')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -228,7 +234,7 @@
                                 End Time <span class="text-red-500">*</span>
                             </label>
                             <input type="time" name="end_time" required value="{{ old('end_time') }}"
-                                   class="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('end_time') border-red-500 @enderror">
+                                   class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('end_time') border-red-500 @enderror">
                             @error('end_time')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror

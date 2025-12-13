@@ -2,7 +2,11 @@
 
 @section('content')
 
-<div x-data="{ addModal: {{ $errors->any() ? 'true' : 'false' }} }">
+<div x-data="{ 
+    addModal: {{ $errors->any() ? 'true' : 'false' }}, 
+    viewModal: false, 
+    viewLeave: {} 
+}">
 
     <div class="bg-white p-6 rounded-xl shadow-lg">
         <div class="flex justify-between items-center mb-6 border-b pb-4">
@@ -110,7 +114,18 @@
                                         </button>
                                     </form>
                                 @endif
-                                <button class="text-blue-600 hover:text-blue-900 transition-colors" title="View Details">
+                                <button 
+                                    @click="viewModal = true; viewLeave = {
+                                        employee_name: '{{ $leave->employee->first_name ?? '' }} {{ $leave->employee->last_name ?? '' }}',
+                                        employee_code: '{{ $leave->employee->employee_code ?? '' }}',
+                                        leave_type: '{{ $leave->leave_type }}',
+                                        start_date: '{{ \Carbon\Carbon::parse($leave->start_date)->format('F d, Y') }}',
+                                        end_date: '{{ \Carbon\Carbon::parse($leave->end_date)->format('F d, Y') }}',
+                                        total_days: '{{ $leave->total_days }}',
+                                        reason: '{{ $leave->reason }}',
+                                        status: '{{ ucfirst($leave->status) }}'
+                                    }"
+                                    class="text-blue-600 hover:text-blue-900 transition-colors" title="View Details">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -231,7 +246,7 @@
                             Leave Type <span class="text-red-500">*</span>
                         </label>
                         <select name="leave_type" required
-                                class="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('leave_type') border-red-500 @enderror">
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('leave_type') border-red-500 @enderror">
                             <option value="">Select Leave Type</option>
                             <option value="Sick Leave" {{ old('leave_type') == 'Sick Leave' ? 'selected' : '' }}>Sick Leave</option>
                             <option value="Vacation Leave" {{ old('leave_type') == 'Vacation Leave' ? 'selected' : '' }}>Vacation Leave</option>
@@ -263,7 +278,7 @@
                                 End Date <span class="text-red-500">*</span>
                             </label>
                             <input type="date" name="end_date" required value="{{ old('end_date') }}"
-                                   class="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('end_date') border-red-500 @enderror">
+                                   class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('end_date') border-red-500 @enderror">
                             @error('end_date')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -276,7 +291,7 @@
                             Reason <span class="text-red-500">*</span>
                         </label>
                         <textarea name="reason" rows="4" required placeholder="Please provide a reason for your leave request..."
-                                  class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all resize-none @error('reason') border-red-500 @enderror">{{ old('reason') }}</textarea>
+                                  class="w-full px-4 py-3 border  rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all resize-none @error('reason') border-red-500 @enderror">{{ old('reason') }}</textarea>
                         @error('reason')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -299,6 +314,101 @@
                     </div>
 
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW LEAVE MODAL -->
+    <div 
+        x-show="viewModal" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4"
+        style="display: none;"
+        @click.self="viewModal = false">
+
+        <div x-show="viewModal"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform scale-95"
+             x-transition:enter-end="opacity-100 transform scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform scale-100"
+             x-transition:leave-end="opacity-0 transform scale-95"
+             class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
+             @click.stop>
+
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-white">Leave Request Details</h2>
+                    <button @click="viewModal = false" class="text-white hover:text-gray-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="px-8 py-6">
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mr-4">
+                            <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900" x-text="viewLeave.employee_name"></h3>
+                            <p class="text-sm text-gray-500" x-text="'Employee Code: ' + viewLeave.employee_code"></p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-4 space-y-3">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600">Leave Type</p>
+                            <p class="text-lg text-gray-900" x-text="viewLeave.leave_type"></p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-600">Start Date</p>
+                                <p class="text-gray-900" x-text="viewLeave.start_date"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-600">End Date</p>
+                                <p class="text-gray-900" x-text="viewLeave.end_date"></p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600">Total Days</p>
+                            <p class="text-lg text-gray-900" x-text="viewLeave.total_days + ' days'"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600">Status</p>
+                            <p class="text-lg font-semibold" x-text="viewLeave.status"
+                               :class="{
+                                   'text-yellow-600': viewLeave.status === 'Pending',
+                                   'text-green-600': viewLeave.status === 'Approved',
+                                   'text-red-600': viewLeave.status === 'Rejected'
+                               }"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600">Reason</p>
+                            <p class="text-gray-900" x-text="viewLeave.reason"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-4 border-t border-gray-200">
+                        <button @click="viewModal = false"
+                            class="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-all duration-200">
+                            Close
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

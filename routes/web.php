@@ -10,7 +10,6 @@ use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShiftController;
 
-// Root - redirect based on auth
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
@@ -22,13 +21,20 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');
+
+    // Assign employee to shift
+    Route::post('/shifts/assign', [ShiftController::class, 'assign'])
+        ->name('shifts.assign');
+
     Route::resource('shifts', ShiftController::class);
     Route::resource('employees', EmployeeController::class);
     Route::resource('attendance', AttendanceController::class);
     Route::resource('leave', LeaveController::class);
+
     Route::post('leave/{leave}/approve', [LeaveController::class, 'approve'])->name('leave.approve');
     Route::post('leave/{leave}/reject', [LeaveController::class, 'reject'])->name('leave.reject');
+
     Route::resource('users', UserController::class);
 });

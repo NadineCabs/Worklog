@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shift;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 
 class ShiftController extends Controller
 {
     public function index()
     {
-        $shifts = Shift::orderBy('shift_name')->get();
-        return view('dashboard.shift', compact('shifts'));
+    $shifts = Shift::with('employees')->orderBy('shift_name')->get();
+    return view('dashboard.shift', compact('shifts'));
     }
 
     public function store(Request $request)
