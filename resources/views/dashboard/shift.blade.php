@@ -30,6 +30,9 @@
                 <thead>
                     <tr class="bg-gray-50">
                         <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Employee
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Shift Name
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -40,9 +43,6 @@
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Duration
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Description
                         </th>
                         <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Actions
@@ -55,6 +55,35 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                                    <span class="text-indigo-600 font-semibold text-sm">
+                                        @if(isset($shift->employee))
+                                            {{ strtoupper(substr($shift->employee->first_name, 0, 1) . substr($shift->employee->last_name, 0, 1)) }}
+                                        @else
+                                            NA
+                                        @endif
+                                    </span>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">
+                                        @if(isset($shift->employee))
+                                            {{ $shift->employee->first_name }} {{ $shift->employee->last_name }}
+                                        @else
+                                            No Employee Assigned
+                                        @endif
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        @if(isset($shift->employee))
+                                            {{ $shift->employee->employee_code }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
                                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
                                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -62,13 +91,7 @@
                                 </div>
                                 <div>
                                     <div class="text-sm font-semibold text-gray-900">{{ $shift->shift_name }}</div>
-                                    <div class="text-xs text-gray-500">
-                                        @php
-                                            $start = \Carbon\Carbon::parse($shift->start_time)->format('h:i A');
-                                            $end = \Carbon\Carbon::parse($shift->end_time)->format('h:i A');
-                                        @endphp
-                                        {{ $start }} - {{ $end }}
-                                    </div>
+                                    <div class="text-xs text-gray-500">ID: {{ $shift->id }}</div>
                                 </div>
                             </div>
                         </td>
@@ -90,11 +113,6 @@
                             @endphp
                             {{ $duration }} hours
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            <div class="max-w-xs truncate" title="{{ $shift->description }}">
-                                {{ $shift->description ?? 'N/A' }}
-                            </div>
-                        </td>
                         
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end items-center space-x-3">
@@ -102,10 +120,10 @@
                                 <button 
                                     @click="editModal = true; editShift = {
                                         id: '{{ $shift->id }}',
+                                        employee_id: '{{ $shift->employee_id }}',
                                         shift_name: '{{ $shift->shift_name }}',
                                         start_time: '{{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }}',
-                                        end_time: '{{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }}',
-                                        description: '{{ $shift->description }}'
+                                        end_time: '{{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }}'
                                     }"
                                     class="text-indigo-600 hover:text-indigo-900 transition-colors" 
                                     title="Edit">
@@ -114,7 +132,7 @@
                                     </svg>
                                 </button>
                                 
-                                <form action="{{ route('shifts.destroy', $shift->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete the shift: {{ $shift->shift_name }}?')" class="inline">
+                                <form action="{{ route('shifts.destroy', $shift->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this shift assignment?')" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-900 transition-colors" title="Delete">
@@ -133,8 +151,8 @@
                                 <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <p class="text-gray-500 text-lg font-medium">No shifts defined yet</p>
-                                <p class="text-gray-400 text-sm mt-1">Click "Add New Shift" to create your first shift</p>
+                                <p class="text-gray-500 text-lg font-medium">No shifts assigned yet</p>
+                                <p class="text-gray-400 text-sm mt-1">Click "Add New Shift" to assign a shift to an employee</p>
                             </div>
                         </td>
                     </tr>
@@ -205,17 +223,44 @@
                 <form action="{{ route('shifts.store') }}" method="POST" class="space-y-5">
                     @csrf
 
+                    <!-- Employee Selection -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Select Employee <span class="text-red-500">*</span>
+                        </label>
+                        <select name="employee_id" required
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('employee_id') border-red-500 @enderror">
+                            <option value="">Select Employee</option>
+                            @if(isset($employees) && $employees->count() > 0)
+                                @foreach($employees as $employee)
+                                <option value="{{ $employee->id }}" {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
+                                    {{ $employee->first_name }} {{ $employee->last_name }} - {{ $employee->employee_code }}
+                                </option>
+                                @endforeach
+                            @else
+                                <option value="" disabled>No employees available</option>
+                            @endif
+                        </select>
+                        @error('employee_id')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Shift Name <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" name="shift_name" required value="{{ old('shift_name') }}"
-                               placeholder="e.g., Morning Shift, Night Shift"
-                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('shift_name') border-red-500 @enderror">
+                        <select name="shift_name" required
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('shift_name') border-red-500 @enderror">
+                            <option value="">Select Shift</option>
+                            <option value="Morning Shift" {{ old('shift_name') == 'Morning Shift' ? 'selected' : '' }}>Morning Shift</option>
+                            <option value="Night Shift" {{ old('shift_name') == 'Night Shift' ? 'selected' : '' }}>Night Shift</option>
+                        </select>
                         @error('shift_name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -239,14 +284,6 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Description
-                        </label>
-                        <textarea name="description" rows="3" placeholder="Optional shift description..."
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all resize-none">{{ old('description') }}</textarea>
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
@@ -308,12 +345,36 @@
                     @csrf
                     @method('PUT')
 
+                    <!-- Employee Selection -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Select Employee <span class="text-red-500">*</span>
+                        </label>
+                        <select name="employee_id" required x-model="editShift.employee_id"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <option value="">Select Employee</option>
+                            @if(isset($employees) && $employees->count() > 0)
+                                @foreach($employees as $employee)
+                                <option value="{{ $employee->id }}">
+                                    {{ $employee->first_name }} {{ $employee->last_name }} - {{ $employee->employee_code }}
+                                </option>
+                                @endforeach
+                            @else
+                                <option value="" disabled>No employees available</option>
+                            @endif
+                        </select>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Shift Name <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" name="shift_name" required x-model="editShift.shift_name"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        <select name="shift_name" required x-model="editShift.shift_name"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <option value="">Select Shift</option>
+                            <option value="Morning Shift">Morning Shift</option>
+                            <option value="Night Shift">Night Shift</option>
+                        </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -332,14 +393,6 @@
                             <input type="time" name="end_time" required x-model="editShift.end_time"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Description
-                        </label>
-                        <textarea name="description" rows="3" x-model="editShift.description"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">

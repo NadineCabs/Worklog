@@ -342,7 +342,7 @@
              @click.stop>
 
             <!-- Modal Header -->
-            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
+            <div class="bg-gradient-to-r from-teal-600 to-teal-700 px-8 py-6">
                 <div class="flex items-center justify-between">
                     <h2 class="text-2xl font-bold text-white">Leave Request Details</h2>
                     <button @click="viewModal = false" class="text-white hover:text-gray-200 transition-colors">
@@ -404,7 +404,7 @@
 
                     <div class="flex justify-end pt-4 border-t border-gray-200">
                         <button @click="viewModal = false"
-                            class="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-all duration-200">
+                            class="px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-all duration-200">
                             Close
                         </button>
                     </div>

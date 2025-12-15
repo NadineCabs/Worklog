@@ -10,14 +10,16 @@ class Shift extends Model
     use HasFactory;
 
     protected $table = 'shifts';
+    
+    // Use 'id' as primary key (Laravel convention)
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'shift_name',
-        'start_time',
-        'end_time',
-        'description'
-    ];
+    'employee_id',  // Add this
+    'shift_name',
+    'start_time',
+    'end_time',
+];
 
     protected $casts = [
         'start_time' => 'datetime:H:i',
@@ -25,8 +27,9 @@ class Shift extends Model
     ];
 
     // Relationship: A shift can have many employees
-    public function employees()
-    {
-        return $this->hasMany(Employee::class, 'shift_id');
-    }
+    
+    public function employee()
+{
+    return $this->belongsTo(Employee::class);
+}
 }
