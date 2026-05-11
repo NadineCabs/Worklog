@@ -48,4 +48,12 @@ class Employee extends Model
     {
         return $this->belongsTo(Shift::class);
     }
+
+    /**
+     * Get the user associated with this employee.
+     */
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 }

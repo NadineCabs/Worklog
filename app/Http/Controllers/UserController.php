@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,22 +12,24 @@ class UserController extends Controller
     public function index()
     {
         $users = User::latest()->get();
-        return view('dashboard.users', compact('users'));
+        $employees = Employee::doesntHave('user')->get();
+        return view('dashboard.users', compact('users', 'employees'));
     }
 
     public function create()
     {
-        return view('dashboard.users-create');
+        $employees = \App\Models\Employee::doesntHave('user')->get();
+        return view('dashboard.users-create', compact('employees'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:100|unique:users',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8|confirmed',
-            'role' => 'required|in:admin,hr,manager,employee'
+            'role' => 'required|in:admin,employee',
+            'employee_id' => 'nullable|exists:employees,id'
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -39,16 +42,21 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        return view('dashboard.users-edit', compact('user'));
+        $employees = \App\Models\Employee::where(function($query) use ($user) {
+            $query->doesntHave('user')->orWhereHas('user', function($q) use ($user) {
+                $q->where('users.id', $user->id);
+            });
+        })->get();
+        return view('dashboard.users-edit', compact('user', 'employees'));
     }
 
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:100|unique:users,username,' . $user->id,
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin,hr,manager,employee',
+            'role' => 'required|in:admin,employee',
+            'employee_id' => 'nullable|exists:employees,id',
             'is_active' => 'boolean'
         ]);
 

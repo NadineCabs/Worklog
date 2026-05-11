@@ -327,7 +327,7 @@
              @click.stop>
 
             <!-- Modal Header -->
-            <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-6">
+            <div class="bg-gradient-to-r from-teal-600 to-teal-700 px-8 py-6">
                 <div class="flex items-center justify-between">
                     <h2 class="text-2xl font-bold text-white">Edit Shift</h2>
                     <button @click="editModal = false" class="text-white hover:text-gray-200 transition-colors">
@@ -402,7 +402,7 @@
                         </button>
 
                         <button type="submit"
-                            class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200">
+                            class="px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 shadow-lg hover:shadow-xl transition-all duration-200">
                             Update Shift
                         </button>
                     </div>

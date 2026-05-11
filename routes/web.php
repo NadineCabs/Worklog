@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmployeeDashboardController;
+use App\Http\Controllers\EmployeePageController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LeaveController;
@@ -23,6 +25,17 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/employee-dashboard', [EmployeeDashboardController::class, 'index'])->name('employee-dashboard');
+    
+    // Employee-specific routes
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/employee/attendance', [EmployeePageController::class, 'attendance'])->name('employee.attendance');
+        Route::get('/employee/request-leave', [EmployeePageController::class, 'requestLeave'])->name('employee.request-leave');
+        Route::post('/employee/request-leave', [EmployeePageController::class, 'storeLeaveRequest'])->name('employee.request-leave.store');
+        Route::get('/employee/profile', [EmployeePageController::class, 'profile'])->name('employee.profile');
+        Route::get('/employee/change-password', [EmployeePageController::class, 'changePassword'])->name('employee.change-password');
+        Route::post('/employee/change-password', [EmployeePageController::class, 'updatePassword'])->name('employee.change-password.update');
+    });
 
     // Assign employee to shift
     Route::post('/shifts/assign', [ShiftController::class, 'assign'])

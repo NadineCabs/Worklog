@@ -13,6 +13,10 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->role === 'employee') {
+                return redirect()->route('employee-dashboard');
+            }
             return redirect()->route('dashboard');
         }
         
@@ -32,8 +36,15 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
             
-            return redirect()->route('dashboard')
-                ->with('success', 'Welcome back, ' . Auth::user()->name . '!');
+            $user = Auth::user();
+            $redirectRoute = 'dashboard';
+            
+            if ($user->role === 'employee') {
+                $redirectRoute = 'employee-dashboard';
+            }
+            
+            return redirect()->route($redirectRoute)
+                ->with('success', 'Welcome back, ' . $user->name . '!');
         }
 
         return back()

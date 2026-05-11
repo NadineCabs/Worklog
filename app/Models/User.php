@@ -18,11 +18,12 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'role',  // Add this
-];
+        'name',
+        'email',
+        'password',
+        'role',
+        'employee_id',
+    ];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -44,5 +45,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the employee associated with this user.
+     */
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
     }
 }
