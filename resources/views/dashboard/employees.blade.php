@@ -75,20 +75,6 @@
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Active</p>
-                    <p class="text-3xl font-bold text-green-600 mt-2">{{ $employees->where('status', 'active')->count() }}</p>
-                </div>
-                <div class="p-3 bg-green-50 rounded-lg">
-                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
                     <p class="text-sm font-medium text-gray-600">Departments</p>
                     <p class="text-3xl font-bold text-purple-600 mt-2">{{ $departments->count() }}</p>
                 </div>
@@ -111,7 +97,6 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Contact</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Department</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Position</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -153,17 +138,6 @@
                         {{ $employee->position ?? 'N/A' }}
                     </td>
                     
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @if($employee->status === 'active')
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                Active
-                            </span>
-                        @else
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                Inactive
-                            </span>
-                        @endif
-                    </td>
                     
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex items-center space-x-3">
@@ -180,7 +154,6 @@
                                     date_of_hire: '{{ $employee->date_of_hire }}',
                                     salary_rate: '{{ $employee->salary_rate }}',
                                     employment_type: '{{ $employee->employment_type }}',
-                                    status: '{{ $employee->status }}',
                                     address: '{{ $employee->address }}'
                                 }"
                                 class="text-indigo-600 hover:text-indigo-900 transition-colors" 
@@ -204,7 +177,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
@@ -391,21 +364,6 @@
                             <option value="full-time" {{ old('employment_type') == 'full-time' ? 'selected' : '' }}>Full-Time</option>
                             <option value="part-time" {{ old('employment_type') == 'part-time' ? 'selected' : '' }}>Part-Time</option>
                             <option value="contract" {{ old('employment_type') == 'contract' ? 'selected' : '' }}>Contract</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-                            Status <span class="text-red-500">*</span>
-                        </label>
-                        <select 
-                            name="status" 
-                            id="status"
-                            required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        >
-                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
                     
@@ -616,22 +574,6 @@
                                 <option value="full-time">Full-Time</option>
                                 <option value="part-time">Part-Time</option>
                                 <option value="contract">Contract</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label for="edit_status" class="block text-sm font-medium text-gray-700 mb-2">
-                                Status <span class="text-red-500">*</span>
-                            </label>
-                            <select 
-                                name="status" 
-                                id="edit_status"
-                                x-model="editEmployee.status"
-                                required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                            >
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
                             </select>
                         </div>
                         

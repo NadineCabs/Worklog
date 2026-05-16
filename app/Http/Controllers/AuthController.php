@@ -30,13 +30,23 @@ class AuthController extends Controller
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:6'
+            'password' => 'required|min:6',
+            'role' => 'required|in:admin,employee',
         ]);
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
+        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->filled('remember'))) {
             $request->session()->regenerate();
             
             $user = Auth::user();
+            if ($user->role !== $credentials['role']) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()
+                    ->withErrors(['email' => 'Invalid role for this login page'])
+                    ->withInput($request->only('email'));
+            }
             $redirectRoute = 'dashboard';
             
             if ($user->role === 'employee') {

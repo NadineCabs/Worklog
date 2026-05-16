@@ -22,8 +22,29 @@
             </div>
             
             <!-- Title -->
-            <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Worklog!</h1>
-            <p class="text-center text-gray-500 text-sm mb-8">Secure Login</p>
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Worklog!</h1>
+
+            <!-- Toggle -->
+            <div class="flex items-center justify-center mb-8">
+                <div class="inline-flex p-1 bg-gray-100 rounded-xl">
+                    <button
+                        type="button"
+                        id="toggle-admin"
+                        class="px-5 py-2 text-sm font-semibold rounded-lg bg-teal-600 text-white shadow-sm"
+                        data-target="admin-login"
+                    >
+                        Admin
+                    </button>
+                    <button
+                        type="button"
+                        id="toggle-user"
+                        class="px-5 py-2 text-sm font-semibold rounded-lg text-gray-600 hover:text-gray-800"
+                        data-target="user-login"
+                    >
+                        User
+                    </button>
+                </div>
+            </div>
             
             <!-- Error Messages -->
             @if(session('error'))
@@ -40,9 +61,11 @@
                 </div>
             @endif
             
-            <!-- Login Form -->
-            <form method="POST" action="{{ route('login.post') }}">
+            <!-- Admin Login Form -->
+            <form method="POST" action="{{ route('login.post') }}" id="admin-login">
                 @csrf
+
+                <input type="hidden" name="role" value="admin">
                 
                 <!-- Username/Email Field -->
                 <div class="mb-5">
@@ -85,6 +108,54 @@
                     Login
                 </button>
             </form>
+
+            <!-- User Login Form -->
+            <form method="POST" action="{{ route('login.post') }}" id="user-login" class="hidden">
+                @csrf
+
+                <input type="hidden" name="role" value="employee">
+
+                <!-- Username/Email Field -->
+                <div class="mb-5">
+                    <input 
+                        type="email" 
+                        name="email" 
+                        id="email-user"
+                        value="{{ old('email') }}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition text-gray-700 placeholder-gray-400"
+                        placeholder="Username"
+                        required 
+                        autofocus
+                    >
+                </div>
+                
+                <!-- Password Field -->
+                <div class="mb-4">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="password-user"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition text-gray-700 placeholder-gray-400"
+                        placeholder="Password"
+                        required
+                    >
+                </div>
+                
+                <!-- Forgot Password Link -->
+                <div class="text-right mb-6">
+                    <a href="#" onclick="alert('Contact your administrator to reset password'); return false;" class="text-sm text-teal-600 hover:text-teal-700 font-medium">
+                        Forgot Password?
+                    </a>
+                </div>
+                
+                <!-- Login Button -->
+                <button 
+                    type="submit"
+                    class="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    Login
+                </button>
+            </form>
             
         </div>
         
@@ -93,6 +164,28 @@
             © 2025 Worklog. All rights reserved.
         </p>
     </div>
-    
+    <script>
+        const toggleAdmin = document.getElementById('toggle-admin');
+        const toggleUser = document.getElementById('toggle-user');
+        const adminForm = document.getElementById('admin-login');
+        const userForm = document.getElementById('user-login');
+
+        const setActive = (activeButton, inactiveButton, showForm, hideForm) => {
+            activeButton.classList.add('bg-teal-600', 'text-white', 'shadow-sm');
+            activeButton.classList.remove('text-gray-600');
+            inactiveButton.classList.remove('bg-teal-600', 'text-white', 'shadow-sm');
+            inactiveButton.classList.add('text-gray-600');
+            showForm.classList.remove('hidden');
+            hideForm.classList.add('hidden');
+        };
+
+        toggleAdmin.addEventListener('click', () => {
+            setActive(toggleAdmin, toggleUser, adminForm, userForm);
+        });
+
+        toggleUser.addEventListener('click', () => {
+            setActive(toggleUser, toggleAdmin, userForm, adminForm);
+        });
+    </script>
 </body>
 </html>

@@ -11,6 +11,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
@@ -48,6 +49,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('leave/{leave}/approve', [LeaveController::class, 'approve'])->name('leave.approve');
     Route::post('leave/{leave}/reject', [LeaveController::class, 'reject'])->name('leave.reject');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
     Route::resource('users', UserController::class);
 });

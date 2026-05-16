@@ -232,23 +232,55 @@
         ></div>
         
         <!-- Main Content Area -->
-        <div class="flex flex-col flex-1 overflow-hidden">
-        
-                <!-- Toggle Sidebar Button (Mobile) -->
-                <button 
-                    @click="sidebarOpen = !sidebarOpen" 
-                    class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+        <div class="flex flex-col flex-1 overflow-x-hidden overflow-y-visible">
+            <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <!-- Toggle Sidebar Button (Mobile) -->
+                    <button 
+                        @click="sidebarOpen = !sidebarOpen" 
+                        class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="hidden lg:block"></div>
+                </div>
                 
-                <div class="hidden lg:block"></div>
-                
-                <!-- User Info -->
                 <div class="flex items-center space-x-4">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center">
+                    <!-- Notifications -->
+                    <div class="relative" id="notification-root">
+                        <button
+                            type="button"
+                            id="notification-bell"
+                            class="relative w-10 h-10 flex items-center justify-center rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition"
+                            aria-label="Notifications"
+                        >
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            <span id="notification-count" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-red-500 text-white items-center justify-center hidden">0</span>
+                        </button>
+
+                        <div id="notification-panel" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                <p class="text-sm font-semibold text-gray-800">Notifications</p>
+                                <button type="button" id="notification-mark-all" class="text-xs text-teal-600 hover:text-teal-700 font-semibold">Mark all</button>
+                            </div>
+                            <div id="notification-list" class="max-h-64 overflow-y-auto"></div>
+                            <div class="border-t border-gray-100 px-4 py-2">
+                                <a href="{{ route('notifications.index') }}" class="text-sm text-teal-600 hover:text-teal-700 font-semibold">View all</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="hidden sm:flex items-center space-x-2">
+                        <div class="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center">
+                            <span class="text-teal-700 font-semibold text-xs">{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</span>
+                        </div>
+                        <span class="text-sm text-gray-700 font-medium">{{ Auth::user()->name }}</span>
                     </div>
                 </div>
             </header>
@@ -279,7 +311,117 @@
             </main>
         </div>
     </div>
-    
+
+    <script>
+        const bellButton = document.getElementById('notification-bell');
+        const panel = document.getElementById('notification-panel');
+        const list = document.getElementById('notification-list');
+        const countBadge = document.getElementById('notification-count');
+        const markAllButton = document.getElementById('notification-mark-all');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        const togglePanel = () => {
+            if (!panel) return;
+            panel.classList.toggle('hidden');
+        };
+
+        const closePanel = (event) => {
+            if (!panel || !bellButton) return;
+            if (!panel.classList.contains('hidden') && !panel.contains(event.target) && !bellButton.contains(event.target)) {
+                panel.classList.add('hidden');
+            }
+        };
+
+        const markRead = async (id) => {
+            if (!id) return;
+            await fetch(`/notifications/${id}/read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+            });
+        };
+
+        const markAllRead = async () => {
+            await fetch('/notifications/read-all', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+            });
+        };
+
+        const renderNotifications = (items) => {
+            if (!list) return;
+            list.innerHTML = '';
+
+            if (!items || items.length === 0) {
+                list.innerHTML = '<div class="px-4 py-6 text-sm text-gray-500">No notifications yet.</div>';
+                return;
+            }
+
+            items.forEach((item) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 ${item.read_at ? '' : 'bg-teal-50'}`;
+                button.innerHTML = `
+                    <div class="text-sm text-gray-800">${item.message}</div>
+                    <div class="text-xs text-gray-500 mt-1">${item.created_at}</div>
+                `;
+                button.addEventListener('click', async () => {
+                    if (!item.read_at) {
+                        await markRead(item.id);
+                    }
+                    if (item.url && item.url !== '#') {
+                        window.location.href = item.url;
+                    }
+                });
+                list.appendChild(button);
+            });
+        };
+
+        const fetchNotifications = async () => {
+            try {
+                const response = await fetch('/notifications/poll');
+                const data = await response.json();
+
+                if (countBadge) {
+                    if (data.unread_count > 0) {
+                        countBadge.textContent = data.unread_count;
+                        countBadge.classList.remove('hidden');
+                        countBadge.classList.add('inline-flex');
+                    } else {
+                        countBadge.classList.add('hidden');
+                        countBadge.classList.remove('inline-flex');
+                    }
+                }
+
+                renderNotifications(data.notifications || []);
+            } catch (error) {
+            }
+        };
+
+        if (bellButton) {
+            bellButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                togglePanel();
+            });
+            if (panel) {
+                panel.addEventListener('click', (event) => event.stopPropagation());
+            }
+            document.addEventListener('click', closePanel);
+            fetchNotifications();
+            setInterval(fetchNotifications, 10000);
+        }
+
+        if (markAllButton) {
+            markAllButton.addEventListener('click', async () => {
+                await markAllRead();
+                await fetchNotifications();
+            });
+        }
+    </script>
+
     @stack('scripts')
 </body>
 </html>

@@ -123,7 +123,7 @@
             <!-- Shift -->
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-2">Shift</p>
-                <p class="text-gray-900 text-lg">{{ $employee->shift->name ?? 'N/A' }}</p>
+                <p class="text-gray-900 text-lg">{{ $employee->shift?->shift_name ?? 'N/A' }}</p>
             </div>
             
             <!-- Status -->

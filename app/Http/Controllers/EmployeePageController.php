@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\UserNotification;
 
 class EmployeePageController extends Controller
 {
@@ -62,13 +65,34 @@ class EmployeePageController extends Controller
             'reason' => 'required|string|min:10|max:500',
         ]);
 
-        $employee->leaves()->create([
+        // Calculate total days
+        $startDate = Carbon::parse($validated['start_date']);
+        $endDate = Carbon::parse($validated['end_date']);
+        $totalDays = $startDate->diffInDays($endDate) + 1;
+
+        $leave = $employee->leaves()->create([
             'leave_type' => $validated['leave_type'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'reason' => $validated['reason'],
+            'total_days' => $totalDays,
             'status' => 'pending',
         ]);
+
+        if (Schema::hasTable('user_notifications')) {
+            $admins = User::where('role', 'admin')->get();
+            if ($admins->isNotEmpty()) {
+                $message = "New leave request from {$employee->name} ({$leave->leave_type}).";
+                foreach ($admins as $admin) {
+                    UserNotification::create([
+                        'user_id' => $admin->id,
+                        'type' => 'leave_submitted',
+                        'message' => $message,
+                        'url' => route('leave.index'),
+                    ]);
+                }
+            }
+        }
 
         return redirect()->route('employee.request-leave')
             ->with('success', 'Leave request submitted successfully.');

@@ -6,6 +6,9 @@ use App\Models\Leave;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
+use App\Models\User;
+use App\Models\UserNotification;
 
 class LeaveController extends Controller
 {
@@ -55,6 +58,18 @@ class LeaveController extends Controller
             'approved_at' => now()
         ]);
 
+        if (Schema::hasTable('user_notifications')) {
+            $recipient = $this->resolveEmployeeUser($leave);
+            if ($recipient) {
+                UserNotification::create([
+                    'user_id' => $recipient->id,
+                    'type' => 'leave_status_changed',
+                    'message' => "Your leave request ({$leave->leave_type}) was approved.",
+                    'url' => route('employee.request-leave'),
+                ]);
+            }
+        }
+
         return redirect()->route('leave.index')
             ->with('success', 'Leave request approved!');
     }
@@ -72,6 +87,18 @@ class LeaveController extends Controller
             'approval_notes' => $validated['approval_notes'] ?? 'Rejected'
         ]);
 
+        if (Schema::hasTable('user_notifications')) {
+            $recipient = $this->resolveEmployeeUser($leave);
+            if ($recipient) {
+                UserNotification::create([
+                    'user_id' => $recipient->id,
+                    'type' => 'leave_status_changed',
+                    'message' => "Your leave request ({$leave->leave_type}) was rejected.",
+                    'url' => route('employee.request-leave'),
+                ]);
+            }
+        }
+
         return redirect()->route('leave.index')
             ->with('success', 'Leave request rejected!');
     }
@@ -82,5 +109,28 @@ class LeaveController extends Controller
 
         return redirect()->route('leave.index')
             ->with('success', 'Leave request deleted successfully!');
+    }
+
+    private function resolveEmployeeUser(Leave $leave): ?User
+    {
+        $employee = $leave->employee;
+        if (!$employee) {
+            return null;
+        }
+
+        if ($employee->user) {
+            return $employee->user;
+        }
+
+        $byEmployeeId = User::where('employee_id', $employee->id)->first();
+        if ($byEmployeeId) {
+            return $byEmployeeId;
+        }
+
+        if (!empty($employee->email)) {
+            return User::where('email', $employee->email)->first();
+        }
+
+        return null;
     }
 }

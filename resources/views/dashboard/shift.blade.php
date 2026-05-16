@@ -231,14 +231,14 @@
                         <select name="employee_id" required
                                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all @error('employee_id') border-red-500 @enderror">
                             <option value="">Select Employee</option>
-                            @if(isset($employees) && $employees->count() > 0)
-                                @foreach($employees as $employee)
+                            @if(isset($availableEmployees) && $availableEmployees->count() > 0)
+                                @foreach($availableEmployees as $employee)
                                 <option value="{{ $employee->id }}" {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
                                     {{ $employee->first_name }} {{ $employee->last_name }} - {{ $employee->employee_code }}
                                 </option>
                                 @endforeach
                             @else
-                                <option value="" disabled>No employees available</option>
+                                <option value="" disabled>No available employees</option>
                             @endif
                         </select>
                         @error('employee_id')

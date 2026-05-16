@@ -46,7 +46,7 @@ class Employee extends Model
 
     public function shift()
     {
-        return $this->belongsTo(Shift::class);
+        return $this->hasOne(Shift::class, 'employee_id');
     }
 
     /**
@@ -55,5 +55,16 @@ class Employee extends Model
     public function user()
     {
         return $this->hasOne(User::class);
+    }
+
+    public function getNameAttribute()
+    {
+        $fullName = trim("{$this->first_name} {$this->last_name}");
+
+        if ($fullName !== '') {
+            return $fullName;
+        }
+
+        return $this->user?->name ?? '';
     }
 }

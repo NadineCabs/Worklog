@@ -56,9 +56,10 @@ class EmployeeController extends Controller
         'date_of_hire'    => 'required|date',
         'salary_rate'     => 'required|numeric|min:0',
         'employment_type' => 'nullable|string',
-        'status'          => 'required|string|max:20',
         'address'         => 'nullable|string',
     ]);
+
+    $validated['status'] = 'active';
 
     Employee::create($validated);
 
@@ -114,7 +115,6 @@ class EmployeeController extends Controller
             'hire_date'       => 'required|date',
             'salary'          => 'nullable|numeric|min:0',
             'employment_type' => 'required|in:full-time,part-time,contract',
-            'status'          => 'required|in:active,inactive',
             'address'         => 'nullable|string', 
         ]);
 
